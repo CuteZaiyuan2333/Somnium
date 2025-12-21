@@ -1,12 +1,13 @@
 use egui::Ui;
-use crate::Tab;
-use crate::Plugin;
+use crate::{Tab, Plugin, AppCommand};
 
-pub struct CorePlugin;
+pub struct CorePlugin {
+    new_file_counter: usize,
+}
 
 impl Default for CorePlugin {
     fn default() -> Self {
-        Self
+        Self { new_file_counter: 1 }
     }
 }
 
@@ -15,31 +16,39 @@ impl Plugin for CorePlugin {
         "core"
     }
 
-    fn on_top_panel(&mut self, ui: &mut Ui) {
+    fn on_top_panel(&mut self, ui: &mut Ui, ctx: &mut Vec<AppCommand>) {
         ui.menu_button("File", |ui| {
-            if ui.button("New").clicked() {
-                // Future: Send command to open Tab::CoreEditor
+            if ui.button("New Editor").clicked() {
+                let name = format!("Untitled-{}", self.new_file_counter);
+                self.new_file_counter += 1;
+                ctx.push(AppCommand::OpenTab(Tab::CoreEditor(name)));
                 ui.close_menu();
             }
-            if ui.button("Open").clicked() {
+            if ui.button("New Terminal").clicked() {
+                ctx.push(AppCommand::OpenTab(Tab::CoreTerminal));
                 ui.close_menu();
             }
             ui.separator();
             if ui.button("Quit").clicked() {
-                // In a real app, we would send a shutdown signal or use ui.ctx().send_viewport_cmd(...)
+                ui.ctx().send_viewport_cmd(egui::ViewportCommand::Close);
                 ui.close_menu();
             }
         });
 
-        ui.menu_button("Edit", |ui| {
-            if ui.button("Cut").clicked() { ui.close_menu(); }
-            if ui.button("Copy").clicked() { ui.close_menu(); }
-            if ui.button("Paste").clicked() { ui.close_menu(); }
+        ui.menu_button("Window", |ui| {
+            if ui.button("Tile All Tabs").clicked() {
+                ctx.push(AppCommand::TileAll);
+                ui.close_menu();
+            }
+            if ui.button("Reset Layout").clicked() {
+                ctx.push(AppCommand::ResetLayout);
+                ui.close_menu();
+            }
         });
 
         ui.menu_button("About", |ui| {
             ui.label("Verbium Core Plugin");
-            ui.label("Version 0.1.0");
+            ui.label("MIT License");
         });
     }
 }

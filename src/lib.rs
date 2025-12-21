@@ -3,9 +3,16 @@ use egui::{Ui, WidgetText};
 pub mod plugins;
 pub mod app;
 
-// ----------------------------------------------------------------------------
-// 1. 全局 Tab 定义 (The Registry of Windows)
-// ----------------------------------------------------------------------------
+#[derive(Clone, Debug)]
+pub enum AppCommand {
+    /// 打开一个新的标签页
+    OpenTab(Tab),
+    /// 强制将所有标签页合并到主窗口
+    TileAll,
+    /// 重置为初始布局
+    ResetLayout,
+}
+
 #[derive(Clone, Debug)]
 pub enum Tab {
     Empty,
@@ -18,31 +25,30 @@ impl Tab {
         match self {
             Tab::Empty => "Empty".into(),
             Tab::CoreTerminal => "Terminal".into(),
-            Tab::CoreEditor(name) => format!("Editor - {}", name).into(),
+            Tab::CoreEditor(name) => format!("📝 {}", name).into(),
         }
     }
 
     pub fn ui(&mut self, ui: &mut Ui) {
         match self {
             Tab::Empty => {
-                ui.label("This is an empty tab for testing.");
+                ui.centered_and_justified(|ui| {
+                    ui.label("Verbium Layout Engine\nDrag tabs to split the screen.");
+                });
             }
             Tab::CoreTerminal => {
-                ui.heading("Core Terminal");
-                ui.code("> echo 'Hello AI'");
+                ui.heading("Terminal");
+                ui.monospace("> _");
             }
             Tab::CoreEditor(name) => {
                 ui.heading(format!("Editing: {}", name));
-                ui.text_edit_multiline(&mut "Some code goes here...".to_string());
+                ui.text_edit_multiline(&mut "".to_string());
             }
         }
     }
 }
 
-// ----------------------------------------------------------------------------
-// 2. 插件接口 (The Plugin Interface)
-// ----------------------------------------------------------------------------
 pub trait Plugin {
     fn name(&self) -> &str;
-    fn on_top_panel(&mut self, ui: &mut Ui);
+    fn on_top_panel(&mut self, ui: &mut Ui, ctx: &mut Vec<AppCommand>);
 }
