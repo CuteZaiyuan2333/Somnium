@@ -26,6 +26,7 @@ dependencies = ["core"]  # 依赖的其他插件 ID
 
 [external_dependencies]
 # 外部 Rust 库依赖。Launcher 会将其合并到主程序的 [dependencies] 中
+# 强烈建议使用 Inline Table 格式（如下所示）以确保 TOML 作用域安全
 serde = "1.0"
 egui_extras = { version = "0.29.1", features = ["syntax_highlighting"] }
 ```
@@ -34,11 +35,10 @@ egui_extras = { version = "0.29.1", features = ["syntax_highlighting"] }
 
 当用户点击“同步/构建”时，Launcher 应执行：
 
-1.  **清理标记区域**：定位 `Cargo.toml` 中的 `BEGIN/END PLUGIN` 标记。
-2.  **收集信息**：遍历 `src/plugins/` 下所有已启用的插件文件夹，读取 `plugin.toml`。
-3.  **注入依赖**：将所有 `external_dependencies` 合并后写入 `Cargo.toml`。
-4.  **注入特性**：为每个插件在 `[features]` 中写入 `plugin_ID = []`。
-5.  **编译命令**：执行 `cargo build` 或 `cargo run --features "plugin_A,plugin_B"`。
+1.  **解析清单**：使用 `toml_edit` 解析根目录 `Cargo.toml`。
+2.  **清理并注入依赖**：定位 `BEGIN/END PLUGIN` 标记，将已启用插件的 `external_dependencies` 以 Inline Table 格式注入。
+3.  **管理特性**：动态更新 `[features]` 表，为每个插件创建 `plugin_ID` 项，并同步更新 `default` 特性列表。
+4.  **执行构建**：保存文件并执行 `cargo build` 或 `cargo run`。
 
 ## 4. 主程序条件编译逻辑
 

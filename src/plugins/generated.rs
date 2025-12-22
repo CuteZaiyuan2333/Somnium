@@ -3,6 +3,9 @@
 #[cfg(feature = "plugin_code_editor")]
 pub mod code_editor;
 
+#[cfg(feature = "plugin_file_manager")]
+pub mod file_manager;
+
 #[cfg(feature = "plugin_test_plugin")]
 pub mod test_plugin;
 
@@ -11,6 +14,8 @@ pub fn get_extra_plugins() -> Vec<Box<dyn crate::Plugin>> {
     vec![
         #[cfg(feature = "plugin_code_editor")]
         Box::new(code_editor::create()),
+        #[cfg(feature = "plugin_file_manager")]
+        Box::new(file_manager::create()),
         #[cfg(feature = "plugin_test_plugin")]
         Box::new(test_plugin::create()),
     ]

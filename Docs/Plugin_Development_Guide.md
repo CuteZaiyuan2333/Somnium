@@ -48,8 +48,21 @@ pub fn create() -> HelloWorldPlugin {
 }
 ```
 
-### 第三步：编译运行
-无需任何手动注册。直接运行：
+### 第三步：声明依赖 (可选)
+如果你的插件需要外部 crate，请在 `src/plugins/hello_world/plugin.toml` 中声明：
+```toml
+[plugin]
+name = "hello_world"
+version = "0.1.0"
+
+[external_dependencies]
+serde = "1.0"
+# 推荐使用这种 Inline Table 格式以确保构建兼容性
+egui_extras = { version = "0.29.1", features = ["syntect"] }
+```
+
+### 第四步：编译运行
+无需任何手动注册。确保 Launcher 中已勾选该插件，然后运行：
 ```bash
 cargo run
 ```

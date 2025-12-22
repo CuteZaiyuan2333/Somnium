@@ -226,25 +226,33 @@ impl LauncherApp {
             features.insert("default", value(default_array));
         }
 
-        let mut new_content = doc.to_string();
-        
-        let begin_dep = "# --- BEGIN PLUGIN DEPENDENCIES ---";
-        let end_dep = "# --- END PLUGIN DEPENDENCIES ---";
-
-        if let (Some(start_idx), Some(end_idx)) = (new_content.find(begin_dep), new_content.find(end_dep)) {
-            let mut dep_string = String::from("\n");
-            for plugin in &self.plugins {
-                if plugin.enabled {
-                    if let Some(deps) = &plugin.meta.external_dependencies {
-                        dep_string.push_str(&format!("# From {}\n", plugin.id));
-                        dep_string.push_str(&toml::to_string(deps)?);
+        // 2. Update dependencies using toml_edit instead of raw string replacement
+        let mut deps_to_add = Vec::new();
+        for plugin in &self.plugins {
+            if plugin.enabled {
+                if let Some(deps) = &plugin.meta.external_dependencies {
+                    for (name, value) in deps {
+                        deps_to_add.push((plugin.id.clone(), name.clone(), value.clone()));
                     }
                 }
             }
-            new_content.replace_range((start_idx + begin_dep.len())..end_idx, &dep_string);
         }
 
-        fs::write(cargo_path, new_content)?;
+        let mut dep_string = String::from("\n");
+        for (plugin_id, name, value) in deps_to_add {
+            dep_string.push_str(&format!("# From {}\n", plugin_id));
+            dep_string.push_str(&format!("{} = {}\n", name, value));
+        }
+
+        let mut final_content = doc.to_string();
+        let begin_dep = "# --- BEGIN PLUGIN DEPENDENCIES ---";
+        let end_dep = "# --- END PLUGIN DEPENDENCIES ---";
+
+        if let (Some(start_idx), Some(end_idx)) = (final_content.find(begin_dep), final_content.find(end_dep)) {
+            final_content.replace_range((start_idx + begin_dep.len())..end_idx, &dep_string);
+        }
+
+        fs::write(cargo_path, final_content)?;
         Ok(())
     }
 }

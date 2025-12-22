@@ -34,17 +34,13 @@ The launcher modifies `Cargo.toml` within designated markers:
 # Managed by Verbium Launcher
 serde = "1.0"
 # --- END PLUGIN DEPENDENCIES ---
-
-[features]
-# --- BEGIN PLUGIN FEATURES ---
-plugin_code_editor = []
-# --- END PLUGIN FEATURES ---
 ```
 Logic:
 1. Iterate through enabled plugins.
 2. Collect all `external_dependencies` from their `plugin.toml`.
-3. Use `toml_edit` to replace the content between markers in `Cargo.toml`.
-4. Ensure `default` features in `Cargo.toml` match the enabled plugins list.
+3. **Crucial**: Convert all dependencies to **Inline Table** format (e.g., `crate = { version = "..." }`) before injection. This prevents one plugin's dependency table from "swallowing" subsequent dependencies (TOML Scope Leakage).
+4. Use `toml_edit` to parse the manifest and replace the content between markers.
+5. Ensure `default` features in `Cargo.toml` match the enabled plugins list.
 
 ### 4.3 Building and Running
 1. Capture `cargo` output using piped `stdout`.

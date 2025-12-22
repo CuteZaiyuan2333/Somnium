@@ -1,0 +1,10 @@
+[plugin]
+name = "file_manager"
+display_name = "File Manager"
+version = "0.1.0"
+author = "Verbium Assistant"
+description = "Browse and observe project directory structure."
+
+[external_dependencies]
+walkdir = "2.5"
+rfd = "0.14"
