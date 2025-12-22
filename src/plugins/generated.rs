@@ -2,8 +2,10 @@
 
 #[cfg(feature = "plugin_code_editor")]
 pub mod code_editor;
+
 #[cfg(feature = "plugin_test_plugin")]
 pub mod test_plugin;
+
 
 pub fn get_extra_plugins() -> Vec<Box<dyn crate::Plugin>> {
     vec![

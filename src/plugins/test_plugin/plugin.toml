@@ -1,11 +1,10 @@
 [plugin]
 name = "test_plugin"
-display_name = "Example Test Plugin"
+display_name = "Test Plugin"
 version = "0.1.0"
 author = "Verbium Team"
-description = "A simple example plugin showing menu injection and custom tabs."
+description = "A simple plugin for testing purposes."
 dependencies = ["core"]
 
 [external_dependencies]
-# This plugin doesn't need extra crates, but if it did:
-# egui_extras = "0.29.1"
+# No external dependencies

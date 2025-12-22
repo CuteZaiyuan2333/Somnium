@@ -20,22 +20,12 @@ impl TabInstance for CodeEditorTab {
             });
             ui.separator();
 
-            let mut layouter = |ui: &egui::Ui, string: &str, _wrap_width: f32| {
-                let layout_job = egui_extras::syntax_highlighting::highlight(
-                    ui.ctx(),
-                    ui.style(),
-                    &egui_extras::syntax_highlighting::CodeTheme::from_memory(ui.ctx(), ui.style()),
-                    &self.language,
-                    string
-                );
-                ui.fonts(|f| f.layout_job(layout_job))
-            };
-            
+            // 基础编辑器，暂不强制启用高亮以防版本不匹配，
+            // 但保留语法高亮槽位。
             let theme = egui::TextEdit::multiline(&mut self.code)
                 .font(egui::TextStyle::Monospace)
                 .code_editor()
                 .lock_focus(true)
-                .layouter(&mut layouter)
                 .desired_width(f32::INFINITY);
             
             ui.add_sized(ui.available_size(), theme);

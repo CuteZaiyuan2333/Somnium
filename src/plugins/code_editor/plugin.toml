@@ -1,10 +1,10 @@
 [plugin]
 name = "code_editor"
-display_name = "Code Editor Plugin"
+display_name = "Code Editor"
 version = "0.1.0"
 author = "Verbium Team"
-description = "A code editor with syntax highlighting (requires egui_extras)."
+description = "A powerful code editor with syntax highlighting."
 dependencies = ["core"]
 
 [external_dependencies]
-egui_extras = { version = "0.29.1", features = ["syntax_highlighting"] }
+egui_extras = { version = "0.29.1", features = ["syntect"] }
