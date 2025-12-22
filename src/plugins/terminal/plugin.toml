@@ -1,0 +1,12 @@
+[plugin]
+name = "terminal"
+display_name = "Terminal"
+version = "0.1.0"
+author = "Verbium Agent"
+description = "A real PTY terminal for Verbium, supporting PowerShell and interactive CLI tools."
+
+[external_dependencies]
+portable-pty = "0.8"
+vte = "0.11"
+parking_lot = "0.12"
+anyhow = "1.0"
