@@ -352,6 +352,70 @@ impl<'a> Perform for LogHandler<'a> {
                     }
                 }
             }
+            'X' => { // ECH - Erase Character
+                let n = p(0).max(1);
+                let (cols, r, c) = (self.state.cols, self.state.cursor_row, self.state.cursor_col);
+                let grid = self.state.grid_mut();
+                if r < grid.len() {
+                    for i in 0..n {
+                        if c + i < cols {
+                            grid[r][c + i] = Cell::default();
+                        }
+                    }
+                }
+            }
+            '@' => { // ICH - Insert Character
+                let n = p(0).max(1);
+                let (_cols, r, c) = (self.state.cols, self.state.cursor_row, self.state.cursor_col);
+                let grid = self.state.grid_mut();
+                if r < grid.len() {
+                    let row = &mut grid[r];
+                    for _ in 0..n {
+                        row.insert(c, Cell::default());
+                        row.pop(); // Remove from end to maintain width
+                    }
+                }
+            }
+            'P' => { // DCH - Delete Character
+                let n = p(0).max(1);
+                let (_cols, r, c) = (self.state.cols, self.state.cursor_row, self.state.cursor_col);
+                let grid = self.state.grid_mut();
+                if r < grid.len() {
+                    let row = &mut grid[r];
+                    for _ in 0..n {
+                        if c < row.len() {
+                            row.remove(c);
+                            row.push(Cell::default()); // Add to end
+                        }
+                    }
+                }
+            }
+            'L' => { // IL - Insert Line
+                let n = p(0).max(1);
+                let (top, bottom) = (self.state.scroll_top, self.state.scroll_bottom);
+                let r = self.state.cursor_row;
+                let cols = self.state.cols; // Capture cols before mut borrow
+                if r >= top && r <= bottom {
+                    let grid = self.state.grid_mut();
+                    for _ in 0..n {
+                        grid.remove(bottom);
+                        grid.insert(r, vec![Cell::default(); cols]);
+                    }
+                }
+            }
+            'M' => { // DL - Delete Line
+                let n = p(0).max(1);
+                let (top, bottom) = (self.state.scroll_top, self.state.scroll_bottom);
+                let r = self.state.cursor_row;
+                let cols = self.state.cols; // Capture cols before mut borrow
+                if r >= top && r <= bottom {
+                    let grid = self.state.grid_mut();
+                    for _ in 0..n {
+                        grid.remove(r);
+                        grid.insert(bottom, vec![Cell::default(); cols]);
+                    }
+                }
+            }
             'r' => {
                 let top = p(0).saturating_sub(1);
                 let bot = if p(1) == 0 { self.state.rows } else { p(1) }.saturating_sub(1);
