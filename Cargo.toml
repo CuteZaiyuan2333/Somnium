@@ -9,12 +9,6 @@ egui = "0.29.1"
 egui_dock = "0.14.0"
 
 # --- BEGIN PLUGIN DEPENDENCIES ---
-# From code_editor
-egui_extras = { features = ["syntect"], version = "0.29.1" }
-# From file_manager
-rfd = "0.14"
-# From file_manager
-walkdir = "2.5"
 # From terminal
 anyhow = "1.0"
 # From terminal
@@ -26,7 +20,7 @@ vte = "0.11"
 # --- END PLUGIN DEPENDENCIES ---
 
 [features]
-default = ["plugin_code_editor", "plugin_file_manager", "plugin_terminal"]
+default = ["plugin_terminal"]
 plugin_code_editor = []
 plugin_file_manager = []
 plugin_terminal = []

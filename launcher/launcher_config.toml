@@ -1,2 +1,2 @@
 project_dir = 'G:\Document-3\verbium'
-enabled_plugins = ["code_editor", "file_manager", "terminal"]
+enabled_plugins = ["terminal"]

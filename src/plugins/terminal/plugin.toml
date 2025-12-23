@@ -1,9 +1,10 @@
 [plugin]
 name = "terminal"
-display_name = "Terminal"
+display_name = "Integrated Terminal"
 version = "0.1.0"
 author = "Verbium Agent"
-description = "A real PTY terminal for Verbium, supporting PowerShell and interactive CLI tools."
+description = "A real integrated terminal for Verbium."
+dependencies = ["core"]
 
 [external_dependencies]
 portable-pty = "0.8"
