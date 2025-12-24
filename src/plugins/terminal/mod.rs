@@ -570,32 +570,43 @@ impl TabInstance for TerminalTab {
                 let content_size = Vec2::new(available_size.x, total_rows as f32 * char_size.y);
                 let (rect, response) = ui.allocate_at_least(content_size, Sense::click_and_drag());
                 
+                // 1. Invisible Input Overlay (Bottom Layer)
+                // We place this BEFORE the background is drawn so that the terminal's 
+                // background covers the TextEdit's default blinking cursor.
+                let input_rect = viewport.translate(rect.min.to_vec2());
+                
+                // Use a scope to make the TextEdit truly invisible (cursor, selection, etc.)
+                let input_response = ui.scope(|ui| {
+                    ui.visuals_mut().selection.bg_fill = Color32::TRANSPARENT;
+                    ui.visuals_mut().selection.stroke.color = Color32::TRANSPARENT;
+                    // Some egui versions use fg_stroke for the cursor
+                    ui.visuals_mut().widgets.active.fg_stroke.color = Color32::TRANSPARENT;
+                    ui.visuals_mut().widgets.hovered.fg_stroke.color = Color32::TRANSPARENT;
+                    ui.visuals_mut().widgets.inactive.fg_stroke.color = Color32::TRANSPARENT;
+
+                    ui.put(
+                        input_rect,
+                        egui::TextEdit::multiline(&mut self.input_buffer)
+                            .id_source(response.id)
+                            .frame(false)
+                            .text_color(Color32::TRANSPARENT)
+                            .cursor_at_end(true)
+                            .lock_focus(true)
+                            .desired_width(f32::INFINITY)
+                    )
+                }).inner;
+
                 if response.clicked() {
                     ui.memory_mut(|m| m.request_focus(response.id));
                 }
 
+                // 2. Render Background (Middle Layer)
+                // This will overwrite/cover anything drawn by the TextEdit above.
                 let painter = ui.painter_at(rect);
                 painter.rect_filled(viewport.translate(rect.min.to_vec2()), 0.0, TERM_BG);
 
-                // Invisible Input Overlay over viewport
-                let input_rect = viewport.translate(rect.min.to_vec2());
-                let input_response = ui.put(
-                    input_rect,
-                    egui::TextEdit::multiline(&mut self.input_buffer)
-                        .id_source(response.id)
-                        .frame(false)
-                        .text_color(Color32::TRANSPARENT)
-                        .cursor_at_end(true)
-                        .lock_focus(true)
-                        .desired_width(f32::INFINITY)
-                );
-
-                if input_response.clicked() {
-                    input_response.request_focus();
-                }
-
-                // Handle Mouse Selection
-                if input_response.hovered() {
+                // 3. Handle Input Events
+                if input_response.has_focus() || input_response.lost_focus() {
                     if let Some(pos) = input_response.interact_pointer_pos() {
                         let rel_pos = pos - rect.min;
                         let col = (rel_pos.x / char_size.x).floor() as usize;
