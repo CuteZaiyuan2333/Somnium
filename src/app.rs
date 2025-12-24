@@ -34,6 +34,16 @@ impl<'a> TabViewer for VerbiumTabViewer<'a> {
     fn on_close(&mut self, _tab: &mut Self::Tab) -> bool {
         true
     }
+
+    fn context_menu(
+        &mut self,
+        ui: &mut egui::Ui,
+        tab: &mut Self::Tab,
+        _surface: egui_dock::SurfaceIndex,
+        _node: egui_dock::NodeIndex,
+    ) {
+        tab.instance.on_context_menu(ui, self.command_queue);
+    }
 }
 
 // ----------------------------------------------------------------------------

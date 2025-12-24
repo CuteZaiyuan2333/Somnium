@@ -15,6 +15,8 @@ static NEXT_TAB_ID: AtomicU64 = AtomicU64::new(1);
 pub trait TabInstance: Debug + Send + Sync {
     fn title(&self) -> WidgetText;
     fn ui(&mut self, ui: &mut Ui, control: &mut Vec<AppCommand>);
+    /// 标签页右键菜单钩子
+    fn on_context_menu(&mut self, _ui: &mut Ui, _control: &mut Vec<AppCommand>) {}
     /// 用于克隆 Trait 对象
     fn box_clone(&self) -> Box<dyn TabInstance>;
 }

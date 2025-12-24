@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 use std::process::{Command, Stdio};
 use std::io::{BufRead, BufReader};
 use std::sync::{Arc, Mutex};
+use std::collections::BTreeMap;
 use toml_edit::{DocumentMut, value};
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -231,21 +232,23 @@ impl LauncherApp {
             features.insert("default", value(default_array));
         }
 
-        // 2. Update dependencies using toml_edit instead of raw string replacement
-        let mut deps_to_add = Vec::new();
+        // 2. Update dependencies (Deduplicated)
+        let mut merged_deps: BTreeMap<String, (toml::Value, Vec<String>)> = BTreeMap::new();
+
         for plugin in &self.plugins {
             if plugin.enabled {
                 if let Some(deps) = &plugin.meta.external_dependencies {
                     for (name, value) in deps {
-                        deps_to_add.push((plugin.id.clone(), name.clone(), value.clone()));
+                        let entry = merged_deps.entry(name.clone()).or_insert_with(|| (value.clone(), Vec::new()));
+                        entry.1.push(plugin.id.clone());
                     }
                 }
             }
         }
 
         let mut dep_string = String::from("\n");
-        for (plugin_id, name, value) in deps_to_add {
-            dep_string.push_str(&format!("# From {}\n", plugin_id));
+        for (name, (value, sources)) in merged_deps {
+            dep_string.push_str(&format!("# From {}\n", sources.join(" & ")));
             dep_string.push_str(&format!("{} = {}\n", name, value));
         }
 
@@ -405,7 +408,7 @@ impl LauncherApp {
                 fs::create_dir_all(&dest_dir)?;
             }
             archive.extract(&dest_dir)?;
-            return Ok(());
+            return Ok(())
         }
 
         Err(anyhow::anyhow!("Invalid .verbium file: plugin.toml not found"))
