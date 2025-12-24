@@ -1,7 +1,7 @@
 use std::path::{Path, PathBuf};
 use std::collections::HashSet;
 use std::sync::{Arc, Mutex};
-use egui::{Ui, WidgetText, CollapsingHeader, Id, Color32, RichText};
+use egui::{Ui, WidgetText, Id, Color32, RichText};
 use crate::{Plugin, AppCommand, TabInstance, Tab, NotificationLevel};
 
 // ----------------------------------------------------------------------------
@@ -64,18 +64,78 @@ impl FileExplorerTab {
         if item_is_dir {
             let is_expanded = self.expanded_nodes.contains(&path);
             
-            // Text styling
-            let mut text = RichText::new(format!("📁 {}", name));
-            if is_selected {
-                text = text.color(ui.visuals().selection.stroke.color);
-            }
-            
-            let header = CollapsingHeader::new(text)
-                .id_salt(id)
-                .open(Some(is_expanded));
+            let state = egui::collapsing_header::CollapsingState::load_with_default_open(
+                ui.ctx(), 
+                id, 
+                is_expanded
+            );
 
-            // D&D: Drop Target (Folders can accept files)
-            let response = header.show(ui, |ui| {
+            // We sync the internal state with our external state if needed, 
+            // but `load_with_default_open` handles persistence. 
+            // However, we want to respect our `expanded_nodes` set strictly or sync them.
+            // Actually, best practice with CollapsingState + external storage is to set it.
+            let mut state = state;
+            state.set_open(is_expanded);
+
+            let mut is_open = false;
+
+            state.show_header(ui, |ui| {
+                // Text styling
+                let mut text = RichText::new(format!("📁 {}", name));
+                if is_selected {
+                    text = text.color(ui.visuals().selection.stroke.color);
+                }
+
+                // Render the label (Interactive for selection and DnD)
+                // We use SelectableLabel to handle the visual selection state nicely
+                let response = ui.add(egui::SelectableLabel::new(is_selected, text)).interact(egui::Sense::drag());
+                
+                // D&D: Drag Source
+                if response.dragged() {
+                    response.dnd_set_drag_payload(path.clone());
+                    
+                    ui.ctx().set_cursor_icon(egui::CursorIcon::Grabbing);
+                    if let Some(pointer_pos) = ui.ctx().pointer_interact_pos() {
+                        let count = if is_selected && self.selected_items.len() > 1 {
+                            self.selected_items.len()
+                        } else {
+                            1
+                        };
+                        egui::Area::new(id.with("dnd_tooltip"))
+                            .fixed_pos(pointer_pos + egui::vec2(16.0, 16.0))
+                            .order(egui::Order::Tooltip)
+                            .show(ui.ctx(), |ui| {
+                                ui.label(format!("Moving {} item(s)", count));
+                            });
+                    }
+                }
+
+                // D&D: Drop Logic (Target)
+                if let Some(source_path) = response.dnd_release_payload::<PathBuf>() {
+                    self.handle_drop(source_path.as_ref(), &path, ui.ctx());
+                    ui.ctx().request_repaint();
+                }
+
+                // Visual feedback for drop target
+                if response.dnd_hover_payload::<PathBuf>().is_some() {
+                    ui.painter().rect_stroke(
+                        response.rect,
+                        2.0,
+                        egui::Stroke::new(2.0, Color32::LIGHT_GRAY),
+                    );
+                }
+
+                // Selection Logic (Click on Label)
+                if response.clicked() {
+                    self.handle_click(&path, ui);
+                }
+
+                response.context_menu(|ui| {
+                    self.context_menu_items(ui, &path, control, name.clone());
+                });
+            })
+            .body(|ui| {
+                is_open = true; // If this closure is called, the folder is open
                 if let Ok(entries) = std::fs::read_dir(&path) {
                     let mut paths: Vec<_> = entries.flatten().map(|e| e.path()).collect();
                     paths.sort_by(|a, b| {
@@ -94,62 +154,12 @@ impl FileExplorerTab {
                 }
             });
 
-            // Make the header interactive for Drag (Source) and Drop (Target)
-            // CollapsingHeader response by default handles clicks. We add Drag sense.
-            let header_response = response.header_response.interact(egui::Sense::drag());
-
-            // D&D: Drag Source Logic
-            if header_response.dragged() {
-                header_response.dnd_set_drag_payload(path.clone());
-                
-                // Show Drag Tooltip
-                ui.ctx().set_cursor_icon(egui::CursorIcon::Grabbing);
-                if let Some(pointer_pos) = ui.ctx().pointer_interact_pos() {
-                    let count = if is_selected && self.selected_items.len() > 1 {
-                        self.selected_items.len()
-                    } else {
-                        1
-                    };
-                    egui::Area::new(id.with("dnd_tooltip"))
-                        .fixed_pos(pointer_pos + egui::vec2(16.0, 16.0))
-                        .order(egui::Order::Tooltip)
-                        .show(ui.ctx(), |ui| {
-                            ui.label(format!("Moving {} item(s)", count));
-                        });
-                }
+            // Update our external expanded state based on what the internal state became
+            if is_open {
+                self.expanded_nodes.insert(path.clone());
+            } else {
+                self.expanded_nodes.remove(&path);
             }
-
-            // D&D: Drop Logic (Target)
-            if let Some(source_path) = header_response.dnd_release_payload::<PathBuf>() {
-                self.handle_drop(source_path.as_ref(), &path, ui.ctx());
-                ui.ctx().request_repaint(); // Refresh to show changes
-            }
-            
-            // Visual feedback for drop target
-            if header_response.dnd_hover_payload::<PathBuf>().is_some() {
-                ui.painter().rect_stroke(
-                    header_response.rect,
-                    2.0,
-                    egui::Stroke::new(2.0, Color32::LIGHT_GRAY),
-                );
-            }
-
-            // Selection Logic (Click)
-            // Note: `header_response.clicked()` might conflict if we are not careful, 
-            // but `Sense::drag()` usually coexists with click if we didn't remove it.
-            if header_response.clicked() {
-                self.handle_click(&path, ui);
-                // Since we use `open(Some(is_expanded))`, we must manually toggle expansion on click
-                if is_expanded {
-                    self.expanded_nodes.remove(&path);
-                } else {
-                    self.expanded_nodes.insert(path.clone());
-                }
-            }
-            
-            header_response.context_menu(|ui| {
-                self.context_menu_items(ui, &path, control, name.clone());
-            });
 
         } else {
             // File display
