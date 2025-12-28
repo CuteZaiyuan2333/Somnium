@@ -32,11 +32,11 @@ impl Plugin for CorePlugin {
     fn on_tab_menu(&mut self, ui: &mut Ui, control: &mut Vec<AppCommand>) {
         if ui.button("Tile All").clicked() {
             control.push(AppCommand::TileAll);
-            ui.close_menu();
+            ui.close();
         }
         if ui.button("Reset Layout").clicked() {
             control.push(AppCommand::ResetLayout);
-            ui.close_menu();
+            ui.close();
         }
     }
 
@@ -44,7 +44,7 @@ impl Plugin for CorePlugin {
         ui.menu_button("Edit", |ui| {
              if ui.button("Settings").clicked() {
                  control.push(AppCommand::ToggleSettings);
-                 ui.close_menu();
+                 ui.close();
              }
         });
 

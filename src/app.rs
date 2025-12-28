@@ -64,8 +64,8 @@ impl<'a> TabViewer for VerbiumTabViewer<'a> {
         true
     }
 
-    fn on_close(&mut self, _tab: &mut Self::Tab) -> bool {
-        true
+    fn on_close(&mut self, _tab: &mut Self::Tab) -> egui_dock::tab_viewer::OnCloseResponse {
+        egui_dock::tab_viewer::OnCloseResponse::Close
     }
 
     fn context_menu(
@@ -109,7 +109,7 @@ pub fn process_commands_system(
     mut show_settings: ResMut<ShowSettings>,
     mut contexts: EguiContexts,
 ) {
-    let ctx = contexts.ctx_mut();
+    let ctx = contexts.ctx_mut().expect("ctx");
     let mut i = 0;
     while i < command_queue.queue.len() {
         let cmd = &command_queue.queue[i];
@@ -197,7 +197,7 @@ pub fn ui_system(
     mut show_settings: ResMut<ShowSettings>,
     time: Res<Time>,
 ) {
-    let ctx = contexts.ctx_mut();
+    let ctx = contexts.ctx_mut().expect("ctx");
     let dt = time.delta_secs();
 
     // 0. 更新通知时间
@@ -208,7 +208,7 @@ pub fn ui_system(
 
     // 1. 顶部栏渲染
     egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
-        egui::menu::bar(ui, |ui| {
+        egui::MenuBar::new().ui(ui, |ui| {
             ui.menu_button("File", |ui| {
                 for plugin in &mut registry.instances {
                     plugin.on_file_menu(ui, &mut command_queue.queue);
@@ -259,8 +259,8 @@ pub fn ui_system(
 
         DockArea::new(&mut dock_state.0)
             .style(style)
-            .show_window_collapse_buttons(false)
-            .show_window_close_buttons(false)
+            .show_leaf_collapse_buttons(false)
+            .show_leaf_close_all_buttons(false)
             .show_close_buttons(true)
             .show_inside(ui, &mut viewer);
     });
@@ -282,7 +282,7 @@ pub fn ui_system(
                 egui::Frame::window(ui.style())
                     .fill(egui::Color32::from_rgba_premultiplied(30, 30, 30, 230))
                     .stroke(egui::Stroke::new(1.0, color))
-                    .rounding(4.0)
+                    .corner_radius(4.0)
                     .show(ui, |ui| {
                         ui.horizontal(|ui| {
                             let icon = match n.level {
@@ -301,7 +301,7 @@ pub fn ui_system(
 }
 
 pub fn setup_fonts_system(mut contexts: EguiContexts) {
-    let ctx = contexts.ctx_mut();
+    let ctx = contexts.ctx_mut().expect("ctx");
     let mut fonts = egui::FontDefinitions::default();
     let mut font_loaded = false;
 
@@ -319,7 +319,7 @@ pub fn setup_fonts_system(mut contexts: EguiContexts) {
                 if let Ok(font_data) = std::fs::read(path) {
                     fonts.font_data.insert(
                         "chinese_font".to_owned(),
-                        egui::FontData::from_owned(font_data),
+                        egui::FontData::from_owned(font_data).into(),
                     );
                     font_loaded = true;
                     break;

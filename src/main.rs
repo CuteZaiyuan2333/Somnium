@@ -11,7 +11,7 @@ fn main() {
             }),
             ..default()
         }))
-        .add_plugins(EguiPlugin)
+        .add_plugins(EguiPlugin::default())
         // 初始化
         .add_systems(Startup, (setup_fonts_system, setup_verbium))
         // 每帧更新逻辑

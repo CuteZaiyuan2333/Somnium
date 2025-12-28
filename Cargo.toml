@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-bevy = { version = "0.15", default-features = false, features = [
+bevy = { version = "0.17", default-features = false, features = [
     "bevy_winit",
     "bevy_render",
     "bevy_core_pipeline",
@@ -17,40 +17,31 @@ bevy = { version = "0.15", default-features = false, features = [
     "tonemapping_luts",
     "default_font",
     "webgpu",
+    "zstd_rust",
 ] }
-bevy_egui = "0.31"
-egui = "0.29"
-egui_dock = "0.14"
+bevy_egui = "0.38"
+egui = "0.33"
+egui_dock = "0.18"
 
 # --- BEGIN PLUGIN DEPENDENCIES ---
-# From manager & terminal
+# From manager
 anyhow = "1.0"
-# From code_editor
-egui_extras = { features = ["syntect"], version = "0.29.1" }
-# From terminal
-parking_lot = "0.12"
-# From terminal
-portable-pty = "0.8"
-# From code_editor & file_manager & manager
-rfd = "0.14"
+# From manager
+rfd = "0.15"
 # From manager
 serde = { features = ["derive"], version = "1.0" }
 # From manager
 toml = "0.8"
 # From manager
 toml_edit = "0.22"
-# From terminal
-unicode-width = "0.1"
-# From terminal
-vte = "0.11"
-# From file_manager & manager
-walkdir = "2.5"
+# From manager
+walkdir = "2.3"
 # From manager
 zip = "0.6"
 # --- END PLUGIN DEPENDENCIES ---
 
 [features]
-default = ["plugin_code_editor", "plugin_file_manager", "plugin_manager", "plugin_terminal"]
+default = ["plugin_manager"]
 plugin_code_editor = []
 plugin_file_manager = []
 plugin_manager = []
