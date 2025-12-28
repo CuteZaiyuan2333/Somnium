@@ -91,7 +91,7 @@ pub enum NotificationLevel {
 // 插件接口
 // ----------------------------------------------------------------------------
 
-pub trait Plugin {
+pub trait Plugin: Send + Sync {
     /// 插件唯一标识名
     fn name(&self) -> &str;
 

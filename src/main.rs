@@ -1,19 +1,24 @@
-#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")] // Hide console on Windows release builds
+use bevy::prelude::*;
+use bevy_egui::EguiPlugin;
+use verbium::app::*;
 
-use eframe::egui;
-use verbium::app::VerbiumApp;
-
-fn main() -> eframe::Result<()> {
-    let native_options = eframe::NativeOptions {
-        viewport: egui::ViewportBuilder::default()
-            .with_inner_size([800.0, 600.0])
-            .with_title("Verbium"),
-        ..Default::default()
-    };
-
-    eframe::run_native(
-        "Verbium",
-        native_options,
-        Box::new(|cc| Ok(Box::new(VerbiumApp::new(cc)))),
-    )
+fn main() {
+    App::new()
+        .add_plugins(DefaultPlugins.set(WindowPlugin {
+            primary_window: Some(Window {
+                title: "Verbium (Bevy)".into(),
+                ..default()
+            }),
+            ..default()
+        }))
+        .add_plugins(EguiPlugin)
+        // 初始化
+        .add_systems(Startup, (setup_fonts_system, setup_verbium))
+        // 每帧更新逻辑
+        .add_systems(Update, (
+            update_plugins_system,
+            ui_system,
+            process_commands_system,
+        ).chain()) // 使用 chain 确保顺序执行，减少指令延迟
+        .run();
 }
