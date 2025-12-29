@@ -1,0 +1,7 @@
+[plugin]
+name = "modeling"
+display_name = "SDF Modeler"
+version = "0.1.0"
+author = "Somnium Team"
+description = "SDF-based CAD and modeling tool"
+dependencies = ["core"]

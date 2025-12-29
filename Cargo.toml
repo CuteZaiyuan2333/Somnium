@@ -22,11 +22,12 @@ bevy = { version = "0.17", default-features = false, features = [
 bevy_egui = "0.38"
 egui = "0.33"
 egui_dock = "0.18"
-egui_extras = { version = "0.33", features = ["syntect"] }
 
 # --- BEGIN PLUGIN DEPENDENCIES ---
 # From manager & terminal
 anyhow = "1.0"
+# From code_editor
+egui_extras = { features = ["syntect"], version = "0.33" }
 # From terminal
 parking_lot = "0.12"
 # From terminal
@@ -50,10 +51,11 @@ zip = "2.2"
 # --- END PLUGIN DEPENDENCIES ---
 
 [features]
-default = ["plugin_code_editor", "plugin_file_manager", "plugin_manager", "plugin_terminal", "plugin_test_plugin"]
+default = ["plugin_code_editor", "plugin_file_manager", "plugin_manager", "plugin_modeling", "plugin_terminal", "plugin_test_plugin"]
 plugin_code_editor = []
 plugin_file_manager = []
 plugin_manager = []
+plugin_modeling = []
 plugin_terminal = []
 plugin_test_plugin = []
 # --- END PLUGIN FEATURES ---
