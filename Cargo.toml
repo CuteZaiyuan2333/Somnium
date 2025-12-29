@@ -26,8 +26,10 @@ egui_dock = "0.18"
 # --- BEGIN PLUGIN DEPENDENCIES ---
 # From manager
 anyhow = "1.0"
-# From manager
-rfd = "0.15"
+# From code_editor
+egui_extras = { features = ["syntect"], version = "0.29.1" }
+# From code_editor & manager
+rfd = "0.14"
 # From manager
 serde = { features = ["derive"], version = "1.0" }
 # From manager
@@ -37,11 +39,11 @@ toml_edit = "0.22"
 # From manager
 walkdir = "2.3"
 # From manager
-zip = "0.6"
+zip = "2.2"
 # --- END PLUGIN DEPENDENCIES ---
 
 [features]
-default = ["plugin_manager"]
+default = ["plugin_code_editor", "plugin_manager"]
 plugin_code_editor = []
 plugin_file_manager = []
 plugin_manager = []

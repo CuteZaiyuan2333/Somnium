@@ -83,6 +83,10 @@ impl<'a> TabViewer for VerbiumTabViewer<'a> {
 // Bevy Systems
 // ----------------------------------------------------------------------------
 
+pub fn setup_camera(mut commands: Commands) {
+    commands.spawn(Camera2d::default());
+}
+
 pub fn setup_verbium(mut commands: Commands) {
     let plugins = plugins::all_plugins();
     commands.insert_resource(PluginRegistry { instances: plugins });
@@ -109,7 +113,9 @@ pub fn process_commands_system(
     mut show_settings: ResMut<ShowSettings>,
     mut contexts: EguiContexts,
 ) {
-    let ctx = contexts.ctx_mut().expect("ctx");
+    let Ok(ctx) = contexts.ctx_mut() else {
+        return;
+    };
     let mut i = 0;
     while i < command_queue.queue.len() {
         let cmd = &command_queue.queue[i];
@@ -197,7 +203,9 @@ pub fn ui_system(
     mut show_settings: ResMut<ShowSettings>,
     time: Res<Time>,
 ) {
-    let ctx = contexts.ctx_mut().expect("ctx");
+    let Ok(ctx) = contexts.ctx_mut() else {
+        return;
+    };
     let dt = time.delta_secs();
 
     // 0. 更新通知时间
@@ -300,8 +308,15 @@ pub fn ui_system(
     }
 }
 
-pub fn setup_fonts_system(mut contexts: EguiContexts) {
-    let ctx = contexts.ctx_mut().expect("ctx");
+pub fn setup_fonts_system(mut contexts: EguiContexts, mut is_setup: Local<bool>) {
+    if *is_setup {
+        return;
+    }
+    
+    let Ok(ctx) = contexts.ctx_mut() else {
+        return;
+    };
+
     let mut fonts = egui::FontDefinitions::default();
     let mut font_loaded = false;
 
@@ -338,4 +353,5 @@ pub fn setup_fonts_system(mut contexts: EguiContexts) {
     }
 
     ctx.set_fonts(fonts);
+    *is_setup = true;
 }
