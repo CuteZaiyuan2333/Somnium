@@ -15,16 +15,19 @@ fn main() {
             }),
             ..default()
         }))
-        .add_plugins(EguiPlugin::default())
-        // 初始化
-        .add_systems(Startup, (setup_camera, setup_verbium))
-        // 核心逻辑更新
-        .add_systems(Update, (
+        .add_plugins(EguiPlugin::default());
+
+    // 恢复标准初始化
+    app.add_systems(Startup, (setup_camera, setup_verbium));
+
+    // 核心逻辑更新
+    app.add_systems(Update, (
             update_plugins_system,
             process_commands_system,
-        ).chain())
-        // UI 渲染逻辑 (在 EguiPrimaryContextPass 中执行以确保 Context 已就绪)
-        .add_systems(EguiPrimaryContextPass, (
+        ).chain());
+
+    // UI 渲染逻辑
+    app.add_systems(EguiPrimaryContextPass, (
             setup_fonts_system,
             ui_system,
         ).chain());
@@ -33,7 +36,7 @@ fn main() {
     {
         app.add_plugins(MaterialPlugin::<modeling::SdfMaterial>::default())
            .add_systems(Startup, modeling::setup_modeling_scene)
-           .add_systems(Update, modeling::update_sdf_time);
+           .add_systems(Update, (modeling::update_sdf_time, modeling::sync_modeling_viewport));
     }
 
     app.run();
