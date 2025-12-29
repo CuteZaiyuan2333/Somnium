@@ -78,7 +78,7 @@ impl FileExplorerTab {
                 }
 
                 // Render the label (Interactive for selection and DnD)
-                let response = ui.add(egui::SelectableLabel::new(is_selected, text)).interact(egui::Sense::drag());
+                let response = ui.add(egui::Button::new(text).selected(is_selected)).interact(egui::Sense::drag());
                 
                 // D&D: Drag Source
                 if response.dragged() {
@@ -112,6 +112,7 @@ impl FileExplorerTab {
                         response.rect,
                         2.0,
                         egui::Stroke::new(2.0, Color32::LIGHT_GRAY),
+                        egui::StrokeKind::Inside,
                     );
                 }
 
@@ -163,7 +164,7 @@ impl FileExplorerTab {
                 }
 
                 // Add sense: click_and_drag
-                let response = ui.add(egui::SelectableLabel::new(is_selected, text)).interact(egui::Sense::drag());
+                let response = ui.add(egui::Button::new(text).selected(is_selected)).interact(egui::Sense::drag());
                 
                 // D&D: Drag Source
                 if response.dragged() {
@@ -290,18 +291,18 @@ impl FileExplorerTab {
             if path.is_file() {
                 control.push(AppCommand::OpenFile(path.clone()));
             }
-            ui.close_menu();
+            ui.close();
         }
         if path.is_dir() {
             if ui.button("New File").clicked() {
                 self.new_item_parent = Some((path.clone(), false));
                 self.input_text = "new_file.txt".to_string();
-                ui.close_menu();
+                ui.close();
             }
             if ui.button("New Folder").clicked() {
                 self.new_item_parent = Some((path.clone(), true));
                 self.input_text = "new_folder".to_string();
-                ui.close_menu();
+                ui.close();
             }
             ui.separator();
         }
@@ -309,15 +310,15 @@ impl FileExplorerTab {
         if ui.button("Rename").clicked() {
             self.rename_path = Some(path.clone());
             self.input_text = name.clone();
-            ui.close_menu();
+            ui.close();
         }
         if ui.button("Reveal in Explorer").clicked() {
             control.push(AppCommand::RevealInShell(path.clone()));
-            ui.close_menu();
+            ui.close();
         }
         if ui.button("Copy Path").clicked() {
             control.push(AppCommand::CopyToClipboard(path.to_string_lossy().to_string()));
-            ui.close_menu();
+            ui.close();
         }
         ui.separator();
         if ui.button("Delete").clicked() {
@@ -344,7 +345,7 @@ impl FileExplorerTab {
                     level: NotificationLevel::Success 
                 });
             }
-            ui.close_menu();
+            ui.close();
         }
     }
 }
@@ -388,6 +389,7 @@ impl TabInstance for FileExplorerTab {
             // Content
             if let Some(root) = self.root_path.clone() {
                 egui::ScrollArea::vertical()
+                    .id_salt("file_explorer_scroll")
                     .auto_shrink([false, false])
                     .show(ui, |ui| {
                         // Create a large empty area that catches clicks to clear selection
@@ -507,7 +509,7 @@ impl Plugin for FileManagerPlugin {
     fn on_tab_menu(&mut self, ui: &mut Ui, control: &mut Vec<AppCommand>) {
         if ui.button("File Explorer").clicked() {
             control.push(AppCommand::OpenTab(Tab::new(Box::new(FileExplorerTab::new()))));
-            ui.close_menu();
+            ui.close();
         }
     }
 }

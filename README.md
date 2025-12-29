@@ -1,6 +1,6 @@
 # Somnium
 
-Somnium 是一款基于 **Bevy Engine** 与 **egui** 构建的高性能、模块化应用开发框架及代码编辑器。作为 Verbium 的演进版本，Somnium 继承并强化了其核心的**静态插件架构**，并利用 Bevy 的 ECS 动力实现了更高的渲染效率与扩展性。
+Somnium 是一款基于 **Bevy Engine 0.17** 与 **egui 0.33** 构建的高性能、模块化应用开发框架及代码编辑器。作为 Verbium 的演进版本，Somnium 继承并强化了其核心的**静态插件架构**，并利用 Bevy 的 ECS 动力实现了更高的渲染效率与扩展性。
 
 ## 🚀 快速开始
 

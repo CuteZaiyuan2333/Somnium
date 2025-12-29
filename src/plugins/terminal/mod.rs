@@ -532,7 +532,7 @@ impl TabInstance for TerminalTab {
 
     fn ui(&mut self, ui: &mut Ui, _control: &mut Vec<AppCommand>) {
         let font_id = FontId::monospace(14.0);
-        let char_size = ui.fonts(|f| {
+        let char_size = ui.fonts_mut(|f| {
             let width = f.glyph_width(&font_id, 'M');
             let height = f.row_height(&font_id);
             Vec2::new(width, height)
@@ -564,6 +564,7 @@ impl TabInstance for TerminalTab {
 
         // 2. Use ScrollArea for native scrolling and scrollbar
         egui::ScrollArea::vertical()
+            .id_salt("terminal_scroll")
             .auto_shrink([false; 2])
             .stick_to_bottom(true)
             .show_viewport(ui, |ui, viewport| {
@@ -587,7 +588,7 @@ impl TabInstance for TerminalTab {
                     ui.put(
                         input_rect,
                         egui::TextEdit::multiline(&mut self.input_buffer)
-                            .id_source(response.id)
+                            .id_salt(response.id)
                             .frame(false)
                             .text_color(Color32::TRANSPARENT)
                             .cursor_at_end(true)
@@ -726,7 +727,7 @@ impl TabInstance for TerminalTab {
                             }
                         }
                     });
-                    if let Some(text) = text_to_copy { ui.output_mut(|o| o.copied_text = text); }
+                    if let Some(text) = text_to_copy { ui.ctx().copy_text(text); }
                     if !self.is_composing { self.input_buffer.clear(); }
                     if !output_to_write.is_empty() { let _ = writer.write_all(output_to_write.as_bytes()); }
                 }
@@ -786,7 +787,7 @@ impl TabInstance for TerminalTab {
                         let cell_pos = row_pos + Vec2::new(c_idx as f32 * char_size.x, 0.0);
                         let mut job = LayoutJob::default();
                         job.append(&cell.c.to_string(), 0.0, TextFormat { font_id: font_id.clone(), color: fg, ..Default::default() });
-                        painter.galley(cell_pos, ui.fonts(|f| f.layout_job(job)), Color32::TRANSPARENT);
+                        painter.galley(cell_pos, ui.fonts_mut(|f| f.layout_job(job)), Color32::TRANSPARENT);
                     }
 
                     if state.cursor_visible && (row_idx == (history.len() + state.cursor_row)) {
@@ -814,7 +815,7 @@ impl Plugin for TerminalPlugin {
             if let Ok(tab) = create_terminal_tab(ui.ctx().clone()) {
                 control.push(AppCommand::OpenTab(Tab::new(Box::new(tab))));
             }
-            ui.close_menu();
+            ui.close();
         }
     }
 }

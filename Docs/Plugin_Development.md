@@ -1,6 +1,6 @@
-# Verbium 插件开发指南
+# Somnium 插件开发指南
 
-本指南将帮助你编写 Verbium 插件。插件是 Verbium 的一等公民，可以控制从菜单栏到编辑器面板的几乎所有内容。
+本指南将帮助你编写 Somnium 插件。插件是 Somnium 的一等公民，可以控制从菜单栏到编辑器面板的几乎所有内容。
 
 ## 1. 插件结构
 
@@ -11,6 +11,8 @@
 
 **关键规范**：
 - `name()` 方法**严禁硬编码**字符串，必须引用 `crate::plugins::PLUGIN_NAME_...` 常量（由 build.rs 自动生成）。
+- **egui 0.33 适配**：菜单关闭请使用 `ui.close()` 而非旧版的 `ui.close_menu()`。
+- **ID 盐值**：`ScrollArea` 等组件请使用 `id_salt` 替代旧版的 `id_source`。
 
 ```rust
 use egui::Ui;
@@ -68,7 +70,7 @@ serde = { version = "1.0", features = ["derive"] }
 ### 3.2 操作系统抽象 (OS Abstraction)
 严禁直接使用 `std::process::Command` 或平台特定的 Shell 命令。
 - **文件管理**：使用 `AppCommand::RevealInShell(path)`。
-- **剪贴板**：使用 `AppCommand::CopyToClipboard(text)`。
+- **剪贴板**：使用 `AppCommand::CopyToClipboard(text)` 或 `ui.ctx().copy_text(text)`。
 
 ### 3.3 通知系统 (Notification)
 不要在插件内自己写弹窗逻辑，除非是复杂的交互界面。对于简单的结果反馈，使用全局通知：

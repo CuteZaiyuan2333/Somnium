@@ -22,13 +22,16 @@ bevy = { version = "0.17", default-features = false, features = [
 bevy_egui = "0.38"
 egui = "0.33"
 egui_dock = "0.18"
+egui_extras = { version = "0.33", features = ["syntect"] }
 
 # --- BEGIN PLUGIN DEPENDENCIES ---
-# From manager
+# From manager & terminal
 anyhow = "1.0"
-# From code_editor
-egui_extras = { features = ["syntect"], version = "0.29.1" }
-# From code_editor & manager
+# From terminal
+parking_lot = "0.12"
+# From terminal
+portable-pty = "0.8"
+# From code_editor & file_manager & manager
 rfd = "0.14"
 # From manager
 serde = { features = ["derive"], version = "1.0" }
@@ -36,14 +39,18 @@ serde = { features = ["derive"], version = "1.0" }
 toml = "0.8"
 # From manager
 toml_edit = "0.22"
-# From manager
-walkdir = "2.3"
+# From terminal
+unicode-width = "0.1"
+# From terminal
+vte = "0.11"
+# From file_manager & manager
+walkdir = "2.5"
 # From manager
 zip = "2.2"
 # --- END PLUGIN DEPENDENCIES ---
 
 [features]
-default = ["plugin_code_editor", "plugin_manager"]
+default = ["plugin_code_editor", "plugin_file_manager", "plugin_manager", "plugin_terminal", "plugin_test_plugin"]
 plugin_code_editor = []
 plugin_file_manager = []
 plugin_manager = []

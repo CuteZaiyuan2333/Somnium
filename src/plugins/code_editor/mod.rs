@@ -160,7 +160,8 @@ impl TabInstance for CodeEditorTab {
 
         // 只有 Ready 状态才执行后续逻辑
         let language = self.language.clone();
-        let mut layouter = move |ui: &egui::Ui, string: &str, wrap_width: f32| {
+        let mut layouter = move |ui: &egui::Ui, string: &dyn egui::TextBuffer, wrap_width: f32| {
+            let string = string.as_str();
             let theme = egui_extras::syntax_highlighting::CodeTheme::from_memory(ui.ctx(), ui.style());
             let mut layout_job = egui_extras::syntax_highlighting::highlight(
                 ui.ctx(),
@@ -170,7 +171,7 @@ impl TabInstance for CodeEditorTab {
                 &language,
             );
             layout_job.wrap.max_width = wrap_width;
-            ui.fonts(|f| f.layout_job(layout_job))
+            ui.fonts_mut(|f| f.layout_job(layout_job))
         };
 
         // 处理同步模式逻辑
@@ -244,11 +245,11 @@ impl TabInstance for CodeEditorTab {
         if let EditorState::Ready = self.state {
             if ui.add_enabled(!self.sync_mode, egui::Button::new("💾 Save")).clicked() {
                 self.save(control);
-                ui.close_menu();
+                ui.close();
             }
             if ui.button("📂 Save As...").clicked() {
                 self.save_as(control);
-                ui.close_menu();
+                ui.close();
             }
             ui.separator();
             
@@ -257,7 +258,7 @@ impl TabInstance for CodeEditorTab {
                 if self.sync_mode {
                     self.last_sync_time = ui.input(|i| i.time);
                 }
-                ui.close_menu();
+                ui.close();
             }
         } else {
              ui.label("Please wait for file to load...");
@@ -336,7 +337,7 @@ impl Plugin for CodeEditorPlugin {
                 String::new(),
                 "rs".into(),
             )))));
-            ui.close_menu();
+            ui.close();
         }
     }
 }

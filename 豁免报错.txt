@@ -1,0 +1,11 @@
+warning: variable does not need to be mutable
+  --> src\plugins\generated.rs:32:9
+   |
+32 |     let mut plugins: Vec<Box<dyn crate::Plugin>> = Vec::new();
+   |         ----^^^^^^^
+   |         |
+   |         help: remove this `mut`
+   |
+   = note: `#[warn(unused_mut)]` on by default
+
+warning: `verbium` (lib) generated 1 warning (run `cargo fix --lib -p verbium` to apply 1 suggestion)

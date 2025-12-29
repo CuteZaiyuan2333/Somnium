@@ -1,10 +1,10 @@
-# Verbium Launcher 设计规范
+# Somnium Launcher 设计规范
 
-Launcher 是 Verbium 生态系统的重要组成部分，负责管理静态插件的编译配置。
+Launcher 是 Somnium 生态系统的重要组成部分，负责管理静态插件的编译配置。
 
 ## 1. 核心职责
 
-由于 Rust 不支持运行时反射加载源码，Verbium 采用 **Launcher 辅助构建** 与 **Build Script 自动代码生成** 的双重策略：
+由于 Rust 不支持运行时反射加载源码，Somnium 采用 **Launcher 辅助构建** 与 **Build Script 自动代码生成** 的双重策略：
 1.  **扫描**：遍历 `src/plugins/` 发现可用插件。
 2.  **配置**：主程序的 `build.rs` 会自动读取 `plugin.toml` 并生成 `src/plugins/generated.rs`，包含插件加载逻辑、名称常量及一致性校验。
 3.  **注入**：Launcher 修改根目录 `Cargo.toml` 注入插件所需的外部依赖。

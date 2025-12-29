@@ -1,0 +1,39 @@
+[package]
+name = "verbium"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+bevy = { version = "0.17", default-features = false, features = [
+    "bevy_winit",
+    "bevy_render",
+    "bevy_core_pipeline",
+    "bevy_sprite",
+    "bevy_text",
+    "bevy_ui",
+    "bevy_window",
+    "x11",
+    "multi_threaded",
+    "tonemapping_luts",
+    "default_font",
+    "webgpu",
+    "zstd_rust",
+] }
+bevy_egui = "0.38"
+egui = "0.33"
+egui_dock = "0.18"
+
+# --- BEGIN PLUGIN DEPENDENCIES ---
+# --- END PLUGIN DEPENDENCIES ---
+
+[features]
+default = ["plugin_manager"]
+plugin_code_editor = []
+plugin_file_manager = []
+plugin_manager = []
+plugin_terminal = []
+plugin_test_plugin = []
+# --- END PLUGIN FEATURES ---
+
+[build-dependencies]
+toml = "0.8"

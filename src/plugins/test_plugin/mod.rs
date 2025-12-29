@@ -35,7 +35,7 @@ impl Plugin for TestPlugin {
             control.push(AppCommand::OpenTab(Tab::new(Box::new(TestTab {
                 text: "Hello from test plugin!".into(),
             }))));
-            ui.close_menu();
+            ui.close();
         }
     }
 }
